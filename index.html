@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading List Tracker</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-image: url('library.jpg'); /* Replace 'library.jpg' with your image file */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+         /* Header and Footer */
+         header, footer {
+            background-color: rgba(58, 5, 75, 0.9); /* Semi-transparent background */
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background for content */
+            border-radius: 10px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            background-color: #3a054b;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #6b227f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Reading List Tracker</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="library.html">Library</a>
+            <a href="profile.html">My Profile</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Add a Book</h2>
+        <form id="readingForm">
+            <label for="title">Book Title:</label>
+            <input type="text" id="title" name="title" placeholder="Enter book title" required>
+
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" placeholder="Enter author name" required>
+
+            <label for="genre">Genre:</label>
+            <select id="genre" name="genre" required>
+                <option value="" disabled selected>Select a genre</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Science Fiction">Science Fiction</option>
+                <option value="Biography">Biography</option>
+                <option value="Romance">Romance</option>
+            </select>
+
+            <label for="status">Reading Status:</label>
+            <select id="status" name="status" required>
+                <option value="" disabled selected>Select a status</option>
+                <option value="Want to Read">Want to Read</option>
+                <option value="Currently Reading">Currently Reading</option>
+                <option value="Read">Read</option>
+            </select>
+
+            <button type="button" onclick="addBook()">Add to Reading List</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2024 Reading List Tracker</p>
+    </footer>
+
+    <script>
+        const bookList = JSON.parse(localStorage.getItem("books")) || [];
+
+        function addBook() {
+            const title = document.getElementById("title").value;
+            const author = document.getElementById("author").value;
+            const genre = document.getElementById("genre").value;
+            const status = document.getElementById("status").value;
+
+            if (!title || !author || !genre || !status) {
+                alert("Please fill out all fields!");
+                return;
+            }
+
+            const book = { title, author, genre, status, notes: "", rating: "", isbn: "" };
+            bookList.push(book);
+            saveToLocalStorage();
+
+            document.getElementById("readingForm").reset();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem("books", JSON.stringify(bookList));
+        }
+    </script>
+</body>
+</html>

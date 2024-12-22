@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5 url('library.jpg') center/cover no-repeat fixed;
+            color: #333;
+        }
+
+        header, footer {
+            background-color: rgba(58, 5, 75, 0.9);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .library {
+            max-width: 800px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .library h2 {
+            text-align: center;
+        }
+
+        .book-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .book-item:last-child {
+            border-bottom: none;
+        }
+
+        .book-details {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons a, .action-buttons button {
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .view-btn {
+            background-color: #0275d8;
+            color: white;
+            text-decoration: none;
+        }
+
+        .view-btn:hover {
+            background-color: #025aa5;
+        }
+
+        .edit-btn {
+            background-color: #3a054b;
+            color: white;
+            text-decoration: none;
+        }
+
+        .edit-btn:hover {
+            background-color: #6b227f;
+        }
+
+        .delete-btn {
+            background-color: #d9534f;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c9302c;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Your Library</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="library.html">Library</a>
+        </nav>
+    </header>
+    <main>
+        <div class="library">
+            <h2>Book Collection</h2>
+            <ul class="book-list" id="book-list">
+                <!-- Books will be dynamically added here -->
+            </ul>
+            <p class="empty-message" id="empty-message" style="display: none;">No books found. Add some to your library!</p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Reading List Tracker</p>
+    </footer>
+
+    <script>
+        const bookListElement = document.getElementById("book-list");
+        const emptyMessageElement = document.getElementById("empty-message");
+
+        // Fetch books from localStorage
+        const bookList = JSON.parse(localStorage.getItem("books")) || [];
+
+        function renderBooks() {
+            // Clear the current list
+            bookListElement.innerHTML = "";
+
+            if (bookList.length === 0) {
+                emptyMessageElement.style.display = "block";
+                return;
+            }
+
+            emptyMessageElement.style.display = "none";
+
+            bookList.forEach((book, index) => {
+                const bookItem = document.createElement("li");
+                bookItem.classList.add("book-item");
+
+                bookItem.innerHTML = `
+                    <div class="book-details">
+                        <strong>${book.title}</strong><br>
+                        <small>${book.author || "Unknown Author"}</small>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="book-details.html?title=${encodeURIComponent(book.title)}" class="view-btn">View Details</a>
+                        <a href="book-details.html?title=${encodeURIComponent(book.title)}&edit=true" class="edit-btn">Edit</a>
+                        <button class="delete-btn" onclick="deleteBook(${index})">Delete</button>
+                    </div>
+                `;
+
+                bookListElement.appendChild(bookItem);
+            });
+        }
+
+        function deleteBook(index) {
+            if (confirm(`Are you sure you want to delete "${bookList[index].title}"?`)) {
+                bookList.splice(index, 1);
+                localStorage.setItem("books", JSON.stringify(bookList));
+                renderBooks();
+            }
+        }
+
+        // Render the list on page load
+        renderBooks();
+    </script>
+</body>
+</html>

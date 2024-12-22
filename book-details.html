@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('library.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #333;
+        }
+
+        header, footer {
+            background-color: rgba(58, 5, 75, 0.9);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .details {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .details h2 {
+            text-align: center;
+            color: #3a054b;
+        }
+
+        .detail-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .detail-item label {
+            font-weight: bold;
+            color: #3a054b;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 5px;
+        }
+
+        .star-rating span {
+            font-size: 20px;
+            color: gold;
+            cursor: pointer;
+        }
+
+        .star-rating span.inactive {
+            color: #ccc;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #3a054b;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #6b227f;
+        }
+
+        .back-btn {
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6b227f;
+            box-shadow: 0 0 5px rgba(107, 34, 127, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Book Details</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="library.html">Library</a>
+        </nav>
+    </header>
+    <main>
+        <div class="details" id="book-details">
+            <h2 id="book-title">Book Title</h2>
+            <div id="details-container"></div>
+            <div>
+                <a href="library.html" class="btn back-btn">Back to Library</a>
+                <button class="btn edit-btn" id="edit-button">Edit</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Reading List Tracker</p>
+    </footer>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const title = params.get("title");
+        const isEditMode = params.get("edit") === "true";
+
+        const bookList = JSON.parse(localStorage.getItem("books")) || [];
+        const book = bookList.find(b => b.title === title);
+
+        const genreOptions = [
+            "Fiction",
+            "Non-Fiction",
+            "Fantasy",
+            "Mystery",
+            "Science Fiction",
+            "Biography",
+            "Romance",
+            "Historical Fiction",
+            "Thriller",
+            "Horror",
+            "Poetry",
+            "Self-Help",
+            "Children's",
+            "Graphic Novel",
+            "Young Adult"
+        ];
+
+        const statusOptions = [
+            "Want to Read",
+            "Currently Reading",
+            "Finished Reading",
+            "Paused",
+            "Abandoned"
+        ];
+
+        const detailsContainer = document.getElementById("details-container");
+
+        function renderStars(rating, editable = false) {
+            const container = document.createElement("div");
+            container.className = "star-rating";
+
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement("span");
+                star.textContent = "★";
+                star.className = i <= rating ? "" : "inactive";
+                if (editable) {
+                    star.addEventListener("click", () => {
+                        const stars = container.querySelectorAll("span");
+                        stars.forEach((s, index) => {
+                            s.className = index < i ? "" : "inactive";
+                        });
+                        container.setAttribute("data-rating", i);
+                    });
+                }
+                container.appendChild(star);
+            }
+
+            if (editable) container.setAttribute("data-rating", rating);
+
+            return container;
+        }
+
+        if (book) {
+            document.getElementById("book-title").textContent = book.title || "Unknown Title";
+
+            const fields = [
+                { label: "Author", key: "author", type: "text" },
+                { label: "Genre", key: "genre", type: "dropdown", options: genreOptions },
+                { label: "Reading Status", key: "status", type: "dropdown", options: statusOptions },
+                { label: "Synopsis", key: "synopsis", type: "textarea" },
+                { label: "Notes", key: "notes", type: "textarea" },
+                { label: "Rating", key: "rating", type: "star-rating" },
+                { label: "ISBN", key: "isbn", type: "text" },
+            ];
+
+            fields.forEach(field => {
+                const div = document.createElement("div");
+                div.className = "detail-item";
+
+                if (isEditMode) {
+                    const label = document.createElement("label");
+                    label.textContent = field.label;
+
+                    if (field.type === "dropdown") {
+                        const select = document.createElement("select");
+                        select.id = field.key;
+
+                        field.options.forEach(option => {
+                            const optionElement = document.createElement("option");
+                            optionElement.value = option;
+                            optionElement.textContent = option;
+                            if (book[field.key] === option) {
+                                optionElement.selected = true;
+                            }
+                            select.appendChild(optionElement);
+                        });
+
+                        div.appendChild(label);
+                        div.appendChild(select);
+                    } else if (field.type === "star-rating") {
+                        const stars = renderStars(book[field.key] || 0, true);
+                        stars.id = field.key;
+                        div.appendChild(label);
+                        div.appendChild(stars);
+                    } else {
+                        const input = field.type === "textarea"
+                            ? document.createElement("textarea")
+                            : document.createElement("input");
+
+                        input.type = field.type;
+                        input.value = book[field.key] || "";
+                        input.id = field.key;
+                        div.appendChild(label);
+                        div.appendChild(input);
+                    }
+                } else {
+                    div.innerHTML = `<strong>${field.label}:</strong> ${
+                        field.type === "star-rating"
+                            ? renderStars(book[field.key] || 0).outerHTML
+                            : `<span>${book[field.key] || "Unknown"}</span>`
+                    }`;
+                }
+
+                detailsContainer.appendChild(div);
+            });
+
+            if (isEditMode) {
+                const saveBtn = document.createElement("button");
+                saveBtn.className = "btn save-btn";
+                saveBtn.textContent = "Save";
+                saveBtn.onclick = () => {
+                    fields.forEach(field => {
+                        if (field.type === "star-rating") {
+                            book[field.key] = Number(
+                                document.getElementById(field.key).getAttribute("data-rating")
+                            );
+                        } else if (field.type === "dropdown") {
+                            book[field.key] = document.getElementById(field.key).value;
+                        } else {
+                            book[field.key] = document.getElementById(field.key).value;
+                        }
+                    });
+                    localStorage.setItem("books", JSON.stringify(bookList));
+                    alert("Changes saved!");
+                    window.location.href = `book-details.html?title=${encodeURIComponent(title)}`;
+                };
+                detailsContainer.appendChild(saveBtn);
+            }
+        } else {
+            alert("Book not found.");
+            window.location.href = "library.html";
+        }
+
+        document.getElementById("edit-button").onclick = () => {
+            window.location.href = `book-details.html?title=${encodeURIComponent(title)}&edit=true`;
+        };
+    </script>
+</body>
+</html>
